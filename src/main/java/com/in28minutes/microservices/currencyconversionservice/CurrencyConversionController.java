@@ -3,6 +3,7 @@ package com.in28minutes.microservices.currencyconversionservice;
 import java.math.BigDecimal;
 import java.util.HashMap;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -30,9 +31,29 @@ public class CurrencyConversionController {
 		
 		return new CurrencyConversion(1001L, from, to,quantity, currencyConversion.getConversionMultiple(),
 				quantity.multiply(currencyConversion.getConversionMultiple()),
-				currencyConversion.getEnvironment()
+				currencyConversion.getEnvironment()+" resttemplate"
 				);
-				//return null;
+				
+		
+	}
+	
+	@Autowired
+	private CurrencyExchangeProxy proxy;
+	@GetMapping("/currency-conversion-feign/from/{from}/to/{to}/quantity/{quantity}")
+	public CurrencyConversion calculateCurrencyConversionFeign(
+			@PathVariable String from,
+			@PathVariable String to,
+			@PathVariable BigDecimal quantity				
+			) {
+		
+		
+		CurrencyConversion currencyConversion =proxy.retrieveExchangeValue(from, to);
+		
+		return new CurrencyConversion(1001L, from, to,quantity, currencyConversion.getConversionMultiple(),
+				quantity.multiply(currencyConversion.getConversionMultiple()),
+				currencyConversion.getEnvironment()+" feign"
+				);
+				
 		
 	}
 }
